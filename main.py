@@ -21,10 +21,10 @@ def ddrescue(partition_path):
     if window.destination_path == ():
         return
     partition_name = partition_path.split('/')[-1]
-    if os.path.isfile(f'/{window.destination_path}/{partition_name}.map'):
-        os.remove(f'/{window.destination_path}/{partition_name}.map')
-    subprocess.Popen(f'ddrescue {partition_path} /{window.destination_path}/{partition_name}.img /{window.destination_path}/{partition_name}.map', shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    subprocess.run(f'./ddrescueview -r 5s /{window.destination_path}/{partition_name}.map', shell=True)
+    if os.path.isfile(f'{window.destination_path}/{partition_name}.map'):
+        os.remove(f'{window.destination_path}/{partition_name}.map')
+    subprocess.Popen(f'ddrescue {partition_path} {window.destination_path}/{partition_name}.img {window.destination_path}/{partition_name}.map > /tmp/ddrescue.log 2>&1', shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    subprocess.run(f'./ddrescueview -r 5s {window.destination_path}/{partition_name}.map', shell=True)
 
 # Get all possible disk that are used in software raid
 # These need to be excluded because the partition table
