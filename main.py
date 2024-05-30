@@ -29,7 +29,7 @@ def ddrescue(partition_path):
     subprocess.run(f'./ddrescueview -r 5s {window.destination_path}/{partition_name}.map', shell=True)
 
 def erase(partition_path):
-    subprocess.run(f'xfce4-terminal --command="../HDCleaner/clean_disk.sh {partition_path}"', shell=True)
+    subprocess.run(f'xfce4-terminal --command="../HDcleaner/clean_disk.sh {partition_path}"', shell=True)
 
 # Get all possible disk that are used in software raid
 # These need to be excluded because the partition table
