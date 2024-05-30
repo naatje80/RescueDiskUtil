@@ -29,7 +29,7 @@ def ddrescue(partition_path):
     subprocess.run(f'./ddrescueview -r 5s {window.destination_path}/{partition_name}.map', shell=True)
 
 def erase(partition_path):
-    subprocess.run(f'xfce4-terminal --command="../HDcleaner/clean_disk.sh {partition_path}"', shell=True)
+    subprocess.run(f'xfce4-terminal --command="./HDcleaner/clean_disk.sh {partition_path}"', shell=True)
 
 # Get all possible disk that are used in software raid
 # These need to be excluded because the partition table
@@ -72,7 +72,8 @@ for partition_path, is_partition in partition_list:
         button.grid(row=i, column=2)
     button = tk.Button(window, text="ddrescue", command=lambda path=partition_path: ddrescue(path))
     button.grid(row=i, column=3)
-    if os.path.isdir('../HDcleaner') and not is_partition:
+    # Check if submodule is checked-out, otherwise HDcleaner can not be used
+    if os.path.isdir('./HDcleaner/') and not is_partition:
         button = tk.Button(window, text="erase", command=lambda path=partition_path: erase(path))
         button.grid(row=i, column=4)
     i+=1

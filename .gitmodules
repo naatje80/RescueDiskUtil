@@ -1,0 +1,3 @@
+[submodule "HDcleaner"]
+	path = HDcleaner
+	url = https://github.com/naatje80/HDcleaner
