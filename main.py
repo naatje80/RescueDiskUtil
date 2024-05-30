@@ -1,9 +1,13 @@
 #! /usr/bin/python3
 
 import parted
+from tkinter import filedialog
 import tkinter as tk
 import subprocess
 import os
+
+raid_disks = []
+partition_list = []
 
 def mount(partition_path):
     subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt; thunar /mnt', shell=True)
@@ -12,19 +16,23 @@ def gparted(partition_path):
     subprocess.run(f'gparted {partition_path}', shell=True)
 
 def ddrescue(partition_path):
+    window.destination_path = filedialog.askdirectory(initialdir = "/")
+    # If canceled destination directory, do not continue ddrescue
+    if window.destination_path = ():
+        return
     partition_name = partition_path.split('/')[-1]
-    if os.path.isfile(f'/tmp/{partition_name}.map'):
-        os.remove(f'/tmp/{partition_name}.map')
-    subprocess.Popen(f'ddrescue {partition_path} /tmp/{partition_name}.img /tmp/{partition_name}.map', shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    subprocess.run(f'./ddrescueview -r 5s /tmp/{partition_name}.map', shell=True)
+    if os.path.isfile(f'/{window.destination_path}/{partition_name}.map'):
+        os.remove(f'/{window.destination_path}/{partition_name}.map')
+    subprocess.Popen(f'ddrescue {partition_path} /{window.destination_path}/{partition_name}.img /{window.destination_path}/{partition_name}.map', shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+    subprocess.run(f'./ddrescueview -r 5s /{window.destination_path}/{partition_name}.map', shell=True)
 
 # Get all possible disk that are used in software raid
 # These need to be excluded because the partition table
 # could not be read.
-file_handel=open('/proc/mdstat', 'r')   
-raid_disks = list(map(lambda x: "/dev/" + x.split('[')[0], file_handel.readlines()[1].split()[4:]))
-file_handel.close()
-partition_list = []
+if os.path.isfile('/proc/mdstat'):
+    file_handel=open('/proc/mdstat', 'r')   
+    raid_disks = list(map(lambda x: "/dev/" + x.split('[')[0], file_handel.readlines()[1].split()[4:]))
+    file_handel.close()
  
 for device in parted.getAllDevices():
     # Skip raid disks and the Raid array itsel
