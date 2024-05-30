@@ -72,7 +72,7 @@ for partition_path, is_partition in partition_list:
         button.grid(row=i, column=2)
     button = tk.Button(window, text="ddrescue", command=lambda path=partition_path: ddrescue(path))
     button.grid(row=i, column=3)
-    if os.path.isdir('../HDCleaner') and not is_partition:
+    if os.path.isdir('../HDcleaner') and not is_partition:
         button = tk.Button(window, text="erase", command=lambda path=partition_path: erase(path))
         button.grid(row=i, column=4)
     i+=1
