@@ -18,7 +18,7 @@ def gparted(partition_path):
 def ddrescue(partition_path):
     window.destination_path = filedialog.askdirectory(initialdir = "/")
     # If canceled destination directory, do not continue ddrescue
-    if window.destination_path = ():
+    if window.destination_path == ():
         return
     partition_name = partition_path.split('/')[-1]
     if os.path.isfile(f'/{window.destination_path}/{partition_name}.map'):
