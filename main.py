@@ -6,6 +6,8 @@ import tkinter as tk
 import subprocess
 import os
 
+version = 0.1
+
 raid_disks = []
 partition_list = []
 
@@ -42,24 +44,31 @@ for device in parted.getAllDevices():
     else:     
         disk=parted.newDisk(device)
 
+    # Also add device to list of tuples
+    partition_list.append((device.path, False)) 
+
     if hasattr(disk, 'partitions'):
         for partition in disk.partitions:
-            partition_list.append(partition.path)
+            partition_list.append((partition.path, True))
     else:
         continue
 
 
 window = tk.Tk()
+window.title(f'RescueDiskUtil V{version}')
+
 i=0
-for partition_path in partition_list:
+for partition_path, is_partition in partition_list:
     label = tk.Label(window, text=partition_path)
     label.grid(row=i, column=0)
-    button = tk.Button(window, text="mount", command=lambda path=partition_path: mount(path))
-    button.grid(row=i, column=2)
-    button = tk.Button(window, text="gparted", command=lambda path=partition_path: gparted(path))
-    button.grid(row=i, column=3)
+    if is_partition:
+        button = tk.Button(window, text="mount", command=lambda path=partition_path: mount(path))
+        button.grid(row=i, column=2)
+    else:
+        button = tk.Button(window, text="gparted", command=lambda path=partition_path: gparted(path))
+        button.grid(row=i, column=2)
     button = tk.Button(window, text="ddrescue", command=lambda path=partition_path: ddrescue(path))
-    button.grid(row=i, column=4)
+    button.grid(row=i, column=3)
     i+=1
 
 window.mainloop()
