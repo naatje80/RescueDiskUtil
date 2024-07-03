@@ -6,6 +6,8 @@ import tkinter as tk
 import subprocess
 import os
 
+from _ped import DiskException
+
 version = 0.1
 
 raid_disks = []
@@ -45,7 +47,12 @@ for device in parted.getAllDevices():
     if device.path in raid_disks or device.model == 'Linux Software RAID Array':
         continue 
     else:     
-        disk=parted.newDisk(device)
+        try:
+            disk=parted.newDisk(device)
+        except DiskException:
+            # Empty disk, add device and continue to next device
+            partition_list.append((device.path, False))
+            continue
 
     # Also add device to list of tuples
     partition_list.append((device.path, False)) 
