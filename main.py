@@ -16,6 +16,9 @@ partition_list = []
 def smart():
     subprocess.run(f'xfce4-terminal --command="/usr/local/bin/crazy"', shell=True)
 
+def clonezilla():
+    subprocess.run(f'xfce4-terminal --command="/usr/bin/clonezilla"', shell=True)
+
 def mount(partition_path):
     subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt; thunar /mnt', shell=True)
 
@@ -72,6 +75,8 @@ window.title(f'RescueDiskUtil V{version}')
 
 button = tk.Button(window, text="S.M.A.R.T", command=lambda: smart())
 button.grid(row=0, column=0)
+button = tk.Button(window, text="Clone", command=lambda: smart())
+button.grid(row=0, column=1)
 
 i=1
 for partition_path, is_partition in partition_list:
