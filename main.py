@@ -13,6 +13,9 @@ version = 0.1
 raid_disks = []
 partition_list = []
 
+def smart():
+    subprocess.run(f'xfce4-terminal --command="/usr/local/bin/crazy"', shell=True)
+
 def mount(partition_path):
     subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt; thunar /mnt', shell=True)
 
@@ -67,7 +70,10 @@ for device in parted.getAllDevices():
 window = tk.Tk()
 window.title(f'RescueDiskUtil V{version}')
 
-i=0
+button = tk.Button(window, text="S.M.A.R.T", command=lambda: smart())
+button.grid(row=0, column=0)
+
+i=1
 for partition_path, is_partition in partition_list:
     label = tk.Label(window, text=partition_path)
     label.grid(row=i, column=0)
