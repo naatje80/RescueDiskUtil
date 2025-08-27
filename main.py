@@ -14,7 +14,7 @@ raid_disks = []
 partition_list = []
 
 def smart():
-    subprocess.run(f'xfce4-terminal --command="/usr/local/crazy"', shell=True)
+    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"/usr/local/crazy; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
 def clonezilla():
     subprocess.run(f'xfce4-terminal --command="/usr/bin/clonezilla"', shell=True)
