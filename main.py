@@ -14,7 +14,7 @@ raid_disks = []
 partition_list = []
 
 def smart():
-    subprocess.run(f'xfce4-terminal --command="/usr/local/bin/crazy"', shell=True)
+    subprocess.run(f'xfce4-terminal --command="/usr/local/crazy"', shell=True)
 
 def clonezilla():
     subprocess.run(f'xfce4-terminal --command="/usr/bin/clonezilla"', shell=True)
@@ -75,7 +75,7 @@ window.title(f'RescueDiskUtil V{version}')
 
 button = tk.Button(window, text="S.M.A.R.T", command=lambda: smart())
 button.grid(row=0, column=0)
-button = tk.Button(window, text="Clone", command=lambda: smart())
+button = tk.Button(window, text="Clone", command=lambda: clonezilla())
 button.grid(row=0, column=1)
 
 i=1
