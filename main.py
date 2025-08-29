@@ -27,7 +27,7 @@ def clonezilla():
     subprocess.run(f'xfce4-terminal --command="/usr/bin/clonezilla"', shell=True)
 
 def mount(partition_path):
-    subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt; thunar /mnt', shell=True)
+    subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt; doublecmd -L /mnt -R / --no-splash', shell=True)
 
 def gparted(partition_path):
     subprocess.run(f'gparted {partition_path}', shell=True)
