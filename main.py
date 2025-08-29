@@ -66,6 +66,8 @@ for device in parted.getAllDevices():
     # Skip raid disks and the Raid array itsel
     if re.search('^/dev/nvme[0..9]+n[0-9]+$', device.path):
         disk_disktype = 'nvme' # if regular expression matches for the device name, its and nvme disk
+    elif re.search('^/dev/sr[0..9]+$', device.path):
+        continue # Skip cdrom/dvd drive
     elif subprocess.run('lsblk -no rota ' + device.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip():
         disk_disktype = 'hdd' # if rotational its a regular hdd
     else:
@@ -95,7 +97,7 @@ for device in parted.getAllDevices():
                 partition_dict['possible_windows_installation'] = True
             else:
                 partition_dict['possible_windows_installation'] = False
-            if not hasattr(disk_dict.keys(), device.path): disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
+            if not device.path in disk_dict.keys(): disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
             disk_dict[device.path]['partitions'].append(partition_dict) 
 
     else:
@@ -130,6 +132,10 @@ for disk_path in disk_dict.keys():
     button.grid(row=i, column=2)
     button = tk.Button(window, text="ddrescue", command=lambda path=disk_path: ddrescue(path))
     button.grid(row=i, column=3)
+    # Check if submodule is checked-out, otherwise HDcleaner can not be used
+    if os.path.isdir('./HDcleaner/'):
+        button = tk.Button(window, text="erase", command=lambda path=disk_path: erase(path))
+        button.grid(row=i, column=4)
     i+=1
     for partition_dict in disk_dict[disk_path]['partitions']:
         if DEBUG: print('Partition info:', partition_dict)
@@ -145,10 +151,6 @@ for disk_path in disk_dict.keys():
         if partition_dict['possible_windows_installation']:
             button = tk.Button(window, text="Admin reset", command=lambda path=partition_path: windows_admin_reset(path))
             button.grid(row=i, column=4)
-        # Check if submodule is checked-out, otherwise HDcleaner can not be used
-        if os.path.isdir('./HDcleaner/'):
-            button = tk.Button(window, text="erase", command=lambda path=partition_path: erase(path))
-            button.grid(row=i, column=5)
         i+=1
 
 # Start the GUI
