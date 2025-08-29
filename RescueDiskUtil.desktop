@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=RescueDiskUtil
+Comment=Rescue Disk Utility
+Exec=/opt/RescueDiskUtil/main.py
+Icon=RescueDiskUtil
