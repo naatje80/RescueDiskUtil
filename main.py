@@ -5,14 +5,20 @@ from tkinter import filedialog
 import tkinter as tk
 import subprocess
 import os
-
+import sys
+import re
+from PIL import ImageTk, Image
 from _ped import DiskException
+
+DEBUG = True
 
 version = 0.2
 
 raid_disks = []
 disk_dict = {}
 partition_dict = {}
+
+script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 def smart():
     subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"/usr/bin/crazy; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
@@ -43,6 +49,11 @@ def erase(partition_path):
 def windows_admin_reset(partition_path):
     subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -f auto {partition_path}; /usr/bin/chntpw /mnt/Windows/System32;read -p \\\\\\"Press enter to continue...\\\\\\"\\\"""', shell=True)
 
+# Should be executed as root
+if os.getuid() != 0:
+    print('Error: Should be executed with root privileges, exiting....')
+    exit(1)
+
 # Get all possible disk that are used in software raid
 # These need to be excluded because the partition table
 # could not be read.
@@ -53,7 +64,13 @@ if os.path.isfile('/proc/mdstat'):
  
 for device in parted.getAllDevices():
     # Skip raid disks and the Raid array itsel
-    #print(device.model)
+    if re.search('^/dev/nvme[0..9]+n[0-9]+$', device.path):
+        disk_disktype = 'nvme' # if regular expression matches for the device name, its and nvme disk
+    elif subprocess.run('lsblk -no rota ' + device.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip():
+        disk_disktype = 'hdd' # if rotational its a regular hdd
+    else:
+        disk_disktype = 'ssd' # All other cases its and ssd
+    if DEBUG: print(f'Found disk: {device.model} Type: {disk_disktype}')
     if device.path in raid_disks or device.model == 'Linux Software RAID Array':
         continue 
     else:     
@@ -61,7 +78,8 @@ for device in parted.getAllDevices():
             disk=parted.newDisk(device)
         except DiskException:
             # Empty disk, add device and continue to next device
-            disk_dict[device.path] = []
+            disk_disktype = subprocess.run('lsblk -no rota ' + device.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip()
+            disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
             continue
     
     
@@ -69,18 +87,20 @@ for device in parted.getAllDevices():
         for partition in disk.partitions:
             partition_label = subprocess.run('lsblk -no lable ' + partition.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip().lower()
             partition_fstype = subprocess.run('lsblk -no fstype ' + partition.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip().lower()
-            if partion_label == 'vtoyefi' or 'ventoy' in partition_label:
+            if partition_label == 'vtoyefi' or 'ventoy' in partition_label:
                 continue # Ventoy USB stick should be skipped
             else:
                 partition_dict['path'] = partition.path
             if partition_fstype == 'ntfs' and (partition_label == '' or partion_label == 'windows'):
                 partition_dict['possible_windows_installation'] = True
-                if not hasattr(disk_keys, device.path):
-                    disk_dict[device.path] = []
-                disk_dict[device.path].append(partition_dict)
+            else:
+                partition_dict['possible_windows_installation'] = False
+            if not hasattr(disk_dict.keys(), device.path): disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
+            disk_dict[device.path]['partitions'].append(partition_dict) 
+
     else:
         # No partitions on this disk, add device and continue to next device
-        disk_dict[device.path] = []
+        disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
         continue # If no partitions are availabe, skip to next
 
 
@@ -92,27 +112,43 @@ button.grid(row=0, column=3)
 button = tk.Button(window, text="Clone", command=lambda: clonezilla())
 button.grid(row=0, column=4)
 
+image_dict = {
+        'arrow': ImageTk.PhotoImage(Image.open(f'{script_dir}/arrow.png')),
+        'ssd': ImageTk.PhotoImage(Image.open(f'{script_dir}/ssd.png')),
+        'hdd': ImageTk.PhotoImage(Image.open(f'{script_dir}/hdd.png')),
+        'nvme': ImageTk.PhotoImage(Image.open(f'{script_dir}/nvme.png'))
+}
+
 i=1
 for disk_path in disk_dict.keys():
-    label = tk.Label(window, text=disk_path)
+    disk_type = disk_dict[disk_path]['disktype']
+    label = tk.Label(window, image=image_dict[disk_type])
     label.grid(row=i, column=0)
+    label = tk.Label(window, text=disk_path)
+    label.grid(row=i, column=1)
     button = tk.Button(window, text="gparted", command=lambda path=disk_path: gparted(path))
     button.grid(row=i, column=2)
-    button = tk.Button(window, text="ddrescue", command=lambda path=partition_path: ddrescue(path))
+    button = tk.Button(window, text="ddrescue", command=lambda path=disk_path: ddrescue(path))
     button.grid(row=i, column=3)
-    for partion_object in disk_dict[disk][0]:
-        partition_path = partition_ojbect['path']
-        label = tk.Label(window, text=partition_path)
+    i+=1
+    for partition_dict in disk_dict[disk_path]['partitions']:
+        if DEBUG: print('Partition info:', partition_dict)
+        label = tk.Label(window, image=image_dict['arrow'])
         label.grid(row=i, column=0)
+        partition_path = partition_dict['path']
+        label = tk.Label(window, text=partition_path)
+        label.grid(row=i, column=1)
         button = tk.Button(window, text="mount", command=lambda path=partition_path: mount(path))
         button.grid(row=i, column=2)
-        if partition_obect['possible_windows_installation']:
+        button = tk.Button(window, text="ddrescue", command=lambda path=partition_path: ddrescue(path))
+        button.grid(row=i, column=3)
+        if partition_dict['possible_windows_installation']:
             button = tk.Button(window, text="Admin reset", command=lambda path=partition_path: windows_admin_reset(path))
-            button.grid(row=i, column=3)
-        # Check if submodule is checked-out, otherwise HDcleaner can not be used
-        if os.path.isdir('./HDcleaner/') and not is_partition:
-            button = tk.Button(window, text="erase", command=lambda path=partition_path: erase(path))
             button.grid(row=i, column=4)
+        # Check if submodule is checked-out, otherwise HDcleaner can not be used
+        if os.path.isdir('./HDcleaner/'):
+            button = tk.Button(window, text="erase", command=lambda path=partition_path: erase(path))
+            button.grid(row=i, column=5)
         i+=1
 
 # Start the GUI
