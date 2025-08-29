@@ -47,7 +47,7 @@ def erase(partition_path):
     subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"./HDcleaner/clean_disk.sh {partition_path};read -p \\\\\\"Press enter to continue...\\\\\\"\\\"""', shell=True)
 
 def windows_admin_reset(partition_path):
-    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -f auto {partition_path}; /usr/bin/chntpw /mnt/Windows/System32;read -p \\\\\\"Press enter to continue...\\\\\\"\\\"""', shell=True)
+    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -t auto {partition_path} /mnt; /usr/bin/chntpw /mnt/Windows/System32/config/SAM;read -p \\\\\\"Press enter to continue...\\\\\\"\\\"""', shell=True)
 
 # Should be executed as root
 if os.getuid() != 0:
@@ -98,7 +98,8 @@ for device in parted.getAllDevices():
             else:
                 partition_dict['possible_windows_installation'] = False
             if not device.path in disk_dict.keys(): disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
-            disk_dict[device.path]['partitions'].append(partition_dict) 
+            disk_dict[device.path]['partitions'].append(partition_dict)
+            partition_dict.clear()
 
     else:
         # No partitions on this disk, add device and continue to next device
