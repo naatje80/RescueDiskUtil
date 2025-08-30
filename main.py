@@ -98,7 +98,7 @@ for device in parted.getAllDevices():
             else:
                 partition_dict['possible_windows_installation'] = False
             if not device.path in disk_dict.keys(): disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
-            disk_dict[device.path]['partitions'].append(partition_dict)
+            disk_dict[device.path]['partitions'].append(partition_dict.copy())
             partition_dict.clear()
 
     else:
@@ -109,6 +109,7 @@ for device in parted.getAllDevices():
 
 window = tk.Tk()
 window.title(f'RescueDiskUtil V{version}')
+window.iconphoto(True, tk.PhotoImage(file=f'{script_dir}/RescueDiskUtil.png'))
 
 button = tk.Button(window, text="S.M.A.R.T", command=lambda: smart())
 button.grid(row=0, column=3)
