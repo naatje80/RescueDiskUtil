@@ -87,13 +87,13 @@ for device in parted.getAllDevices():
     
     if hasattr(disk, 'partitions'):
         for partition in disk.partitions:
-            partition_label = subprocess.run('lsblk -no lable ' + partition.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip().lower()
+            partition_label = subprocess.run('lsblk -no label ' + partition.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip().lower()
             partition_fstype = subprocess.run('lsblk -no fstype ' + partition.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip().lower()
             if partition_label == 'vtoyefi' or 'ventoy' in partition_label:
                 continue # Ventoy USB stick should be skipped
             else:
                 partition_dict['path'] = partition.path
-            if partition_fstype == 'ntfs' and (partition_label == '' or partion_label == 'windows'):
+            if partition_fstype == 'ntfs' and (partition_label == '' or partition_label == 'windows'):
                 partition_dict['possible_windows_installation'] = True
             else:
                 partition_dict['possible_windows_installation'] = False
@@ -111,9 +111,9 @@ window = tk.Tk()
 window.title(f'RescueDiskUtil V{version}')
 window.iconphoto(True, tk.PhotoImage(file=f'{script_dir}/RescueDiskUtil.png'))
 
-button = tk.Button(window, text="S.M.A.R.T", command=lambda: smart())
+button = tk.Button(window, width=10, text="S.M.A.R.T", command=lambda: smart())
 button.grid(row=0, column=3)
-button = tk.Button(window, text="Clone", command=lambda: clonezilla())
+button = tk.Button(window, width=10, text="Clone", command=lambda: clonezilla())
 button.grid(row=0, column=4)
 
 image_dict = {
@@ -130,13 +130,13 @@ for disk_path in disk_dict.keys():
     label.grid(row=i, column=0)
     label = tk.Label(window, text=disk_path)
     label.grid(row=i, column=1)
-    button = tk.Button(window, text="gparted", command=lambda path=disk_path: gparted(path))
+    button = tk.Button(window, width=10, text="gparted", command=lambda path=disk_path: gparted(path))
     button.grid(row=i, column=2)
-    button = tk.Button(window, text="ddrescue", command=lambda path=disk_path: ddrescue(path))
+    button = tk.Button(window, width=10, text="ddrescue", command=lambda path=disk_path: ddrescue(path))
     button.grid(row=i, column=3)
     # Check if submodule is checked-out, otherwise HDcleaner can not be used
     if os.path.isdir(f'{script_dir}/HDcleaner/'):
-        button = tk.Button(window, text="erase", command=lambda path=disk_path: erase(path))
+        button = tk.Button(window, width=10, text="erase", command=lambda path=disk_path: erase(path))
         button.grid(row=i, column=4)
     i+=1
     for partition_dict in disk_dict[disk_path]['partitions']:
@@ -146,12 +146,12 @@ for disk_path in disk_dict.keys():
         partition_path = partition_dict['path']
         label = tk.Label(window, text=partition_path)
         label.grid(row=i, column=1)
-        button = tk.Button(window, text="mount", command=lambda path=partition_path: mount(path))
+        button = tk.Button(window, width=10, text="mount", command=lambda path=partition_path: mount(path))
         button.grid(row=i, column=2)
-        button = tk.Button(window, text="ddrescue", command=lambda path=partition_path: ddrescue(path))
+        button = tk.Button(window, width=10, text="ddrescue", command=lambda path=partition_path: ddrescue(path))
         button.grid(row=i, column=3)
         if partition_dict['possible_windows_installation']:
-            button = tk.Button(window, text="Admin reset", command=lambda path=partition_path: windows_admin_reset(path))
+            button = tk.Button(window, width=10, text="Admin reset", command=lambda path=partition_path: windows_admin_reset(path))
             button.grid(row=i, column=4)
         i+=1
 
