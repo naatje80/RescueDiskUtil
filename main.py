@@ -21,7 +21,7 @@ partition_dict = {}
 script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 def smart():
-    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"/usr/bin/crazy; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
+    subprocess.run(f'xfce4-terminal --gemotery 90x38 --command="/bin/bash -c \\\"/usr/bin/crazy; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
 def clonezilla():
     subprocess.run(f'xfce4-terminal --command="/usr/bin/clonezilla"', shell=True)
@@ -135,7 +135,7 @@ for disk_path in disk_dict.keys():
     button = tk.Button(window, text="ddrescue", command=lambda path=disk_path: ddrescue(path))
     button.grid(row=i, column=3)
     # Check if submodule is checked-out, otherwise HDcleaner can not be used
-    if os.path.isdir('./HDcleaner/'):
+    if os.path.isdir(f'{script_dir}/HDcleaner/'):
         button = tk.Button(window, text="erase", command=lambda path=disk_path: erase(path))
         button.grid(row=i, column=4)
     i+=1
