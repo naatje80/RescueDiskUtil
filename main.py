@@ -49,6 +49,9 @@ def erase(partition_path):
 def windows_admin_reset(partition_path):
     subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -t auto {partition_path} /mnt; /usr/bin/chntpw /mnt/Windows/System32/config/SAM;read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
+def windows_info(partition_path):
+    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -t auto {partition_path} /mnt; BUILD_NUMBER=`hivexget /mnt/Windows/System32/config/SOFTWARE \\\\\\"\\Microsoft\\Windows NT\\CurrentVersion\\\\\\" CurrentBuildNumber`; PRODUCT_NAME=`hivexget /mnt/Windows/System32/config/SOFTWARE \\\\\\"\\Microsoft\\Windows NT\\CurrentVersion\\\\\\" ProductName`; if [[ $BUILD_NUMBER >= 22000 ]]; then echo $PRODUCT_NAME|sed \\\\\\"s/10/11/\\\\\\"; else $PRODUCT_NAME; fi; echo Build: $BUILD_NUMBER; hivexget /mnt/Windows/System32/config/SOFTWARE \\\\\\"\\Microsoft\\Windows NT\\CurrentVersion\\SoftwareProtectionPlatform\\\\\\" BackupProductKeyDefault; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
+
 # Should be executed as root
 if os.getuid() != 0:
     print('Error: Should be executed with root privileges, exiting....')
@@ -153,6 +156,8 @@ for disk_path in disk_dict.keys():
         if partition_dict['possible_windows_installation']:
             button = tk.Button(window, width=10, text="Admin reset", command=lambda path=partition_path: windows_admin_reset(path))
             button.grid(row=i, column=4)
+            button = tk.Button(window, width=10, text="Windows info", command=lambda path=partition_path: windows_info(path))
+            button.grid(row=i, column=5)
         i+=1
 
 # Start the GUI
