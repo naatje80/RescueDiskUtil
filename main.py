@@ -21,7 +21,7 @@ partition_dict = {}
 script_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 def smart():
-    subprocess.run(f'xfce4-terminal --gemotery 90x38 --command="/bin/bash -c \\\"/usr/bin/crazy; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
+    subprocess.run(f'xfce4-terminal --geometry 90x38 --command="/bin/bash -c \\\"/usr/bin/crazy; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
 def clonezilla():
     subprocess.run(f'xfce4-terminal --command="/usr/bin/clonezilla"', shell=True)
@@ -81,7 +81,7 @@ for device in parted.getAllDevices():
         disk_disktype = 'nvme' # if regular expression matches for the device name, its and nvme disk
     elif re.search('^/dev/sr[0..9]+$', device.path):
         continue # Skip cdrom/dvd drive
-    elif subprocess.run('lsblk -no rota ' + device.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip():
+    elif subprocess.run('lsblk -no rota ' + device.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip() != '0':
         disk_disktype = 'hdd' # if rotational its a regular hdd
     else:
         disk_disktype = 'ssd' # All other cases its and ssd
@@ -93,7 +93,6 @@ for device in parted.getAllDevices():
             disk=parted.newDisk(device)
         except DiskException:
             # Empty disk, add device and continue to next device
-            disk_disktype = subprocess.run('lsblk -no rota ' + device.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip()
             disk_dict[device.path] = {'partitions': [], 'disktype': disk_disktype}
             continue
     
