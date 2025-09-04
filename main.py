@@ -49,8 +49,18 @@ def erase(partition_path):
 def windows_admin_reset(partition_path):
     subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -t auto {partition_path} /mnt; /usr/bin/chntpw /mnt/Windows/System32/config/SAM;read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
-def windows_info(partition_path):
-    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -t auto {partition_path} /mnt; BUILD_NUMBER=`hivexget /mnt/Windows/System32/config/SOFTWARE \\\\\\"\\Microsoft\\Windows NT\\CurrentVersion\\\\\\" CurrentBuildNumber`; PRODUCT_NAME=`hivexget /mnt/Windows/System32/config/SOFTWARE \\\\\\"\\Microsoft\\Windows NT\\CurrentVersion\\\\\\" ProductName`; if [[ $BUILD_NUMBER >= 22000 ]]; then echo $PRODUCT_NAME|sed \\\\\\"s/10/11/\\\\\\"; else $PRODUCT_NAME; fi; echo Build: $BUILD_NUMBER; hivexget /mnt/Windows/System32/config/SOFTWARE \\\\\\"\\Microsoft\\Windows NT\\CurrentVersion\\SoftwareProtectionPlatform\\\\\\" BackupProductKeyDefault; read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
+def windows_info(partition_path, main_window):
+    subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt', shell=True)
+    product_name = subprocess.run(f'hivexget /mnt/Windows/System32/config/SOFTWARE "\Microsoft\Windows NT\CurrentVersion" ProductName', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
+    build_number = int(subprocess.run(f'hivexget /mnt/Windows/System32/config/SOFTWARE "\Microsoft\Windows NT\CurrentVersion" CurrentBuildNumber', shell=True, capture_output=True).stdout.decode('UTF-8').strip())
+    if build_number >= 22000:
+        product_name = product_name.replace('10', '11')
+    windows_serial = subprocess.run(f'hivexget /mnt/Windows/System32/config/SOFTWARE "\Microsoft\Windows NT\CurrentVersion\SoftwareProtectionPlatform" BackupProductKeyDefault', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
+    message_window= tk.Toplevel(main_window)
+    message_window.title('Windows Installation information')
+    textbox = tk.Text(message_window, width=40, height=5, font=('Sans-Serif',12))
+    textbox.insert(tk.END, f'{product_name} (build: {build_number})\n{windows_serial}')
+    textbox.pack()
 
 # Should be executed as root
 if os.getuid() != 0:
@@ -156,7 +166,7 @@ for disk_path in disk_dict.keys():
         if partition_dict['possible_windows_installation']:
             button = tk.Button(window, width=10, text="Admin reset", command=lambda path=partition_path: windows_admin_reset(path))
             button.grid(row=i, column=4)
-            button = tk.Button(window, width=10, text="Windows info", command=lambda path=partition_path: windows_info(path))
+            button = tk.Button(window, width=10, text="Windows info", command=lambda path=partition_path: windows_info(path, window))
             button.grid(row=i, column=5)
         i+=1
 
