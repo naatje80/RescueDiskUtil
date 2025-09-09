@@ -44,7 +44,7 @@ def ddrescue(partition_path):
     subprocess.run(f'./ddrescueview -r 5s {window.destination_path}/{partition_name}.map', shell=True)
 
 def erase(partition_path):
-    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"{script_dir}/HDcleaner/clean_disk.sh {partition_path};read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
+    subprocess.run(f'xfce4-terminal --geometry 138x33 --command="/bin/bash -c \\\"{script_dir}/HDcleaner/clean_disk.sh {partition_path};read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
 def windows_admin_reset(partition_path):
     if os.path.isfile('/mnt/Windows/System32/config/SAM'):
