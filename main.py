@@ -47,22 +47,23 @@ def erase(partition_path):
     subprocess.run(f'xfce4-terminal --geometry 138x33 --command="/bin/bash -c \\\"{script_dir}/HDcleaner/clean_disk.sh {partition_path};read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
 def windows_admin_reset(partition_path):
+    subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt', shell=True)
     if os.path.isfile('/mnt/Windows/System32/config/SAM'):
         regfile = '/mnt/Windows/System32/config/SAM'
     elif os.path.isfile('/mnt/Windows/System32/config/sam'):
         regfile = '/mnt/Windows/System32/config/sam'
     else:
         return
-    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"umount -f /mnt; mount -t auto {partition_path} /mnt; /usr/bin/chntpw {regfile};read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
+    subprocess.run(f'xfce4-terminal --command="/bin/bash -c \\\"/usr/bin/chntpw {regfile};read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
 
 def windows_info(partition_path, main_window):
+    subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt', shell=True)
     if os.path.isfile('/mnt/Windows/System32/config/SOFTWARE'):
         regfile = '/mnt/Windows/System32/config/SOFTWARE'
     elif os.path.isfile('/mnt/Windows/System32/config/software'):
         regfile = '/mnt/Windows/System32/config/software'
     else:
         return
-    subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt', shell=True)
     product_name = subprocess.run(f'hivexget {regfile} "\\\\Microsoft\\Windows NT\\CurrentVersion" ProductName', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
     build_number = int(subprocess.run(f'hivexget {regfile} "\\Microsoft\\Windows NT\\CurrentVersion" CurrentBuildNumber', shell=True, capture_output=True).stdout.decode('UTF-8').strip())
     if build_number >= 22000:
