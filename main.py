@@ -96,7 +96,7 @@ for device in parted.getAllDevices():
         disk_disktype = 'nvme' # if regular expression matches for the device name, its and nvme disk
     elif re.search('^/dev/sr[0..9]+$', device.path):
         continue # Skip cdrom/dvd drive
-    elif subprocess.run('lsblk -no rota ' + device.path, shell=True, capture_output=True).stdout.decode('UTF-8').strip() != '0':
+    elif subprocess.run(f'lsblk -no rota {device.path}|head -n 1', shell=True, capture_output=True).stdout.decode('UTF-8').strip() != '0':
         disk_disktype = 'hdd' # if rotational its a regular hdd
     else:
         disk_disktype = 'ssd' # All other cases its and ssd
