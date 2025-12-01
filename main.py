@@ -59,22 +59,25 @@ def windows_admin_reset(partition_path):
 def windows_info(partition_path, main_window):
     subprocess.run(f'umount -f /mnt; mount -t auto {partition_path} /mnt', shell=True)
     if os.path.isfile('/mnt/Windows/System32/config/SOFTWARE'):
-        regfile = '/mnt/Windows/System32/config/SOFTWARE'
+        software_regfile = '/mnt/Windows/System32/config/SOFTWARE'
+        system_regfile = '/mnt/Windows/System32/config/SYSTEM'
     elif os.path.isfile('/mnt/Windows/System32/config/software'):
-        regfile = '/mnt/Windows/System32/config/software'
+        software_regfile = '/mnt/Windows/System32/config/software'
+        system_regfile = '/mnt/Windows/System32/config/systeM'
     else:
         return
-    product_name = subprocess.run(f'hivexget {regfile} "\\\\Microsoft\\Windows NT\\CurrentVersion" ProductName', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
-    build_number = int(subprocess.run(f'hivexget {regfile} "\\Microsoft\\Windows NT\\CurrentVersion" CurrentBuildNumber', shell=True, capture_output=True).stdout.decode('UTF-8').strip())
+    product_name = subprocess.run(f'hivexget {software_regfile} "\\\\Microsoft\\Windows NT\\CurrentVersion" ProductName', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
+    pc_name = subprocess.run(f'hivexget {system_regfile} "\\ControlSet001\\Control\\ComputerName\\ComputerName" ComputerName', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
+    build_number = int(subprocess.run(f'hivexget {software_regfile} "\\Microsoft\\Windows NT\\CurrentVersion" CurrentBuildNumber', shell=True, capture_output=True).stdout.decode('UTF-8').strip())
     if build_number >= 22000:
         product_name = product_name.replace('10', '11')
-    windows_serial = subprocess.run(f'hivexget {regfile} "\\Microsoft\\Windows NT\\CurrentVersion\\SoftwareProtectionPlatform" BackupProductKeyDefault', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
+    windows_serial = subprocess.run(f'hivexget {software_regfile} "\\Microsoft\\Windows NT\\CurrentVersion\\SoftwareProtectionPlatform" BackupProductKeyDefault', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
     if windows_serial == '':
-        windows_serial = subprocess.run(f'hivexget {regfile} "\\Microsoft\\Windows NT\\CurrentVersion" DigitalProductId', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
+        windows_serial = subprocess.run(f'hivexget {software_regfile} "\\Microsoft\\Windows NT\\CurrentVersion" DigitalProductId', shell=True, capture_output=True).stdout.decode('UTF-8').strip()
     message_window= tk.Toplevel(main_window)
     message_window.title('Windows Installation information')
     textbox = tk.Text(message_window, width=40, height=5, font=('Sans-Serif',12))
-    textbox.insert(tk.END, f'{product_name} (build: {build_number})\n{windows_serial}')
+    textbox.insert(tk.END, f'{product_name} (build: {build_number})\n{windows_serial}\nPC: {pc_name}')
     textbox.pack()
 
 # Should be executed as root
