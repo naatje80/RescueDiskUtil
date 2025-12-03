@@ -41,7 +41,7 @@ def ddrescue(partition_path):
     if os.path.isfile(f'{window.destination_path}/{partition_name}.map'):
         os.remove(f'{window.destination_path}/{partition_name}.map')
     subprocess.Popen(f'ddrescue {partition_path} {window.destination_path}/{partition_name}.img {window.destination_path}/{partition_name}.map > /tmp/ddrescue.log 2>&1', shell=True, stdout = subprocess.PIPE, stderr = subprocess.PIPE)
-    subprocess.run(f'./ddrescueview -r 5s {window.destination_path}/{partition_name}.map', shell=True)
+    subprocess.run(f'ddrescueview -r 5s {window.destination_path}/{partition_name}.map', shell=True)
 
 def erase(partition_path):
     subprocess.run(f'xfce4-terminal --geometry 138x33 --command="/bin/bash -c \\\"{script_dir}/HDcleaner/clean_disk.sh {partition_path};read -p \\\\\\"Press enter to continue...\\\\\\"\\\""', shell=True)
