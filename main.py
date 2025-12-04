@@ -172,6 +172,8 @@ for disk_path in disk_dict.keys():
     if os.path.isdir(f'{script_dir}/HDcleaner/'):
         button = tk.Button(window, width=10, text="erase", command=lambda path=disk_path: erase(path))
         button.grid(row=i, column=4)
+    button = tk.Button(window, width=10, text="Recover", command=lambda path=disk_path: recover(path))
+    button.grid(row=i, column=4)
     i+=1
     for partition_dict in disk_dict[disk_path]['partitions']:
         if DEBUG: print('Partition info:', partition_dict)
@@ -189,9 +191,6 @@ for disk_path in disk_dict.keys():
             button.grid(row=i, column=4)
             button = tk.Button(window, width=10, text="Windows info", command=lambda path=partition_path: windows_info(path, window))
             button.grid(row=i, column=5)
-        else:
-            button = tk.Button(window, width=10, text="Recover", command=lambda path=partition_path: recover(path))
-            button.grid(row=i, column=4)
         i+=1
 
 # Start the GUI
