@@ -12,7 +12,7 @@ from _ped import DiskException
 
 DEBUG = True
 
-version = 0.2
+version = 0.3
 
 raid_disks = []
 disk_dict = {}
