@@ -80,6 +80,10 @@ def windows_info(partition_path, main_window):
     textbox.insert(tk.END, f'{product_name} (build: {build_number})\n{windows_serial}\nPC: {pc_name}')
     textbox.pack()
 
+def recover(partition_path):
+    subprocess.run(f'xfce4-terminal --command="/usr/bin/testdisk {partition_path}"', shell=True)
+
+
 # Should be executed as root
 if os.getuid() != 0:
     print('Error: Should be executed with root privileges, exiting....')
@@ -185,6 +189,9 @@ for disk_path in disk_dict.keys():
             button.grid(row=i, column=4)
             button = tk.Button(window, width=10, text="Windows info", command=lambda path=partition_path: windows_info(path, window))
             button.grid(row=i, column=5)
+        else:
+            button = tk.Button(window, width=10, text="Recover", command=lambda path=partition_path: recover(path))
+            button.grid(row=i, column=4)
         i+=1
 
 # Start the GUI
